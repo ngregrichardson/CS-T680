@@ -1,0 +1,17 @@
+version: '3.9'
+services:
+  redis:
+    extends:
+      file: ../redis-docker-compose.yml
+      service: redis
+  polls-api:
+    container_name: ngr27-polls-api
+    depends_on:
+      - redis
+    image: ngregrichardson/polls-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '1080:1080'
+    
