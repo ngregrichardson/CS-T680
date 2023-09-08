@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"polls-api/schema"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,4 +27,21 @@ func FormatHostname(host string, port uint, tls bool) string {
 	}
 
 	return fmt.Sprintf("%s://%s:%d", proto, host, port)
+}
+
+func GenerateCRUDLinks(fullUrl string) gin.H {
+	return gin.H{
+		"get": schema.Link{
+			Method: "GET",
+			Url:    fullUrl,
+		},
+		"update": schema.Link{
+			Method: "PATCH",
+			Url:    fullUrl,
+		},
+		"delete": schema.Link{
+			Method: "DELETE",
+			Url:    fullUrl,
+		},
+	}
 }

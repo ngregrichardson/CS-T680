@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"polls-api/cache"
 	"polls-api/schema"
+	"polls-api/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,32 +29,34 @@ func NewPollsService() (*PollsService, error) {
 }
 
 func (service *PollsService) FormatExternal(poll schema.Poll) gin.H {
-	fullUrl := fmt.Sprintf("%s%s", service.Hostname, service.GetIdPath(poll.ID))
+	fullUrl := fmt.Sprintf("%s%s", service.Hostname, service.GetPollPath(poll.ID))
 	return gin.H{
 		"id":       poll.ID,
 		"title":    poll.Title,
 		"question": poll.Question,
 		"options":  poll.Options,
-		"links": gin.H{
-			"get": schema.Link{
-				Method: "GET",
-				Url:    fullUrl,
-			},
-			"update": schema.Link{
-				Method: "PATCH",
-				Url:    fullUrl,
-			},
-			"delete": schema.Link{
-				Method: "DELETE",
-				Url:    fullUrl,
-			},
-		},
+		"links":    utils.GenerateCRUDLinks(fullUrl),
 	}
 }
 
-func (service *PollsService) GetIdPath(id uint) string {
+func (service *PollsService) FormatExternalPollOption(id uint, pollOption schema.PollOption) gin.H {
+	fullUrl := fmt.Sprintf("%s%s%s", service.Hostname, service.GetPollPath(id), service.GetPollOptionSubPath(pollOption.ID))
+	return gin.H{
+		"id":    pollOption.ID,
+		"title": pollOption.Title,
+		"links": utils.GenerateCRUDLinks(fullUrl),
+	}
+}
+
+func (service *PollsService) GetPollPath(id uint) string {
 	return fmt.Sprintf("/polls/%d", id)
 }
+
+func (service *PollsService) GetPollOptionSubPath(id uint) string {
+	return fmt.Sprintf("/options/%d", id)
+}
+
+/* Manage Polls */
 
 func (service *PollsService) GetPolls() ([]schema.Poll, error) {
 	polls := make([]schema.Poll, 0)
@@ -147,6 +150,102 @@ func (service *PollsService) DeletePoll(id uint) error {
 
 	if delErr != nil {
 		return delErr
+	}
+
+	return nil
+}
+
+/* Manage Poll Options */
+
+func (service *PollsService) GetPollOptions(id uint) (schema.PollOptions, error) {
+	poll, err := service.GetPoll(id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return poll.Options, nil
+}
+
+func (service *PollsService) GetPollOption(id uint, optionId uint) (*schema.PollOption, int, error) {
+	poll, err := service.GetPoll(id)
+
+	if err != nil {
+		return &schema.PollOption{}, -1, err
+	}
+
+	return poll.GetPollOption(optionId)
+}
+
+func (service *PollsService) CreatePollOption(id uint, pollOption schema.PollOption) (*schema.PollOption, error) {
+	poll, pollErr := service.GetPoll(id)
+
+	if pollErr != nil {
+		return &schema.PollOption{}, pollErr
+	}
+
+	_, _, existingPollOptionErr := poll.GetPollOption(pollOption.ID)
+
+	if existingPollOptionErr == nil {
+		return &schema.PollOption{}, errors.New("option already exists for that poll")
+	}
+
+	newPollOption, _ := poll.AddPollOption(pollOption)
+
+	_, replaceErr := service.replacePoll(id, poll)
+
+	if replaceErr != nil {
+		return &schema.PollOption{}, replaceErr
+	}
+
+	return newPollOption, nil
+}
+
+func (service *PollsService) UpdatePollOption(id uint, optionId uint, pollOptionBody schema.PollOption) (*schema.PollOption, error) {
+	poll, pollNotFoundError := service.GetPoll(id)
+
+	if pollNotFoundError != nil {
+		return &schema.PollOption{}, pollNotFoundError
+	}
+
+	_, pollOptionIndex, pollOptionError := poll.GetPollOption(optionId)
+
+	if pollOptionError != nil {
+		return &schema.PollOption{}, pollOptionError
+	}
+
+	pollOptionBody.ID = optionId
+
+	poll.Options[pollOptionIndex] = pollOptionBody
+
+	_, replaceErr := service.replacePoll(id, poll)
+
+	if replaceErr != nil {
+		return &schema.PollOption{}, replaceErr
+	}
+
+	return &poll.Options[pollOptionIndex], nil
+}
+
+func (service *PollsService) DeletePollOption(id uint, optionId uint) error {
+	poll, pollNotFoundError := service.GetPoll(id)
+
+	if pollNotFoundError != nil {
+		return pollNotFoundError
+	}
+
+	_, pollOptionIndex, pollOptionNotFoundError := poll.GetPollOption(optionId)
+
+	if pollOptionNotFoundError != nil {
+		return pollOptionNotFoundError
+	}
+
+	poll.Options = append(poll.Options[:pollOptionIndex], poll.Options[pollOptionIndex+1:]...)
+
+	_, replaceErr := service.replacePoll(id, poll)
+
+	if replaceErr != nil {
+		return replaceErr
 	}
 
 	return nil

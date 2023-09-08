@@ -33,6 +33,12 @@ func GetRouter(group *gin.RouterGroup, hostname string) {
 	group.GET("/:id", getPoll)
 	group.PATCH("/:id", updatePoll)
 	group.DELETE("/:id", deletePoll)
+
+	group.GET("/:id/options", getPollOptions)
+	group.POST("/:id/options", createPollOption)
+	group.GET("/:id/options/:optionId", getPollOption)
+	group.PATCH("/:id/options/:optionId", updatePollOption)
+	group.DELETE("/:id/options/:optionId", deletePollOption)
 }
 
 func getHealth(c *gin.Context) {
@@ -142,4 +148,127 @@ func deletePoll(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, utils.ResponseMessage("poll deleted"))
+}
+
+func getPollOptions(c *gin.Context) {
+	id, idValidationError := utils.ValidateIntParam(c, "id")
+
+	if idValidationError != nil {
+		return
+	}
+
+	pollOptions, err := pollsService.GetPollOptions(id)
+
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusNotFound, utils.ResponseError(err.Error()))
+		return
+	}
+
+	externalPollOptions := make([]gin.H, 0)
+
+	for _, pollOption := range pollOptions {
+		externalPollOptions = append(externalPollOptions, pollsService.FormatExternalPollOption(id, pollOption))
+	}
+
+	c.JSON(http.StatusOK, externalPollOptions)
+}
+
+func getPollOption(c *gin.Context) {
+	id, idValidationError := utils.ValidateIntParam(c, "id")
+
+	if idValidationError != nil {
+		return
+	}
+
+	optionId, optionIdValidationError := utils.ValidateIntParam(c, "optionId")
+
+	if optionIdValidationError != nil {
+		return
+	}
+
+	pollOption, _, pollOptionNotFoundError := pollsService.GetPollOption(id, optionId)
+
+	if pollOptionNotFoundError != nil {
+		c.AbortWithStatusJSON(http.StatusNotFound, utils.ResponseError(pollOptionNotFoundError.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, pollsService.FormatExternalPollOption(id, *pollOption))
+}
+
+func createPollOption(c *gin.Context) {
+	id, idValidationError := utils.ValidateIntParam(c, "id")
+
+	if idValidationError != nil {
+		return
+	}
+
+	var pollOptionBody schema.PollOption = schema.BlankPollOption()
+	validationError := utils.ValidateBody(c, &pollOptionBody)
+
+	if validationError != nil {
+		return
+	}
+
+	createPollOption, createPollOptionError := pollsService.CreatePollOption(id, pollOptionBody)
+
+	if createPollOptionError != nil {
+		c.AbortWithStatusJSON(http.StatusConflict, utils.ResponseError(createPollOptionError.Error()))
+		return
+	}
+
+	c.JSON(http.StatusCreated, pollsService.FormatExternalPollOption(id, *createPollOption))
+}
+
+func updatePollOption(c *gin.Context) {
+	id, idValidationError := utils.ValidateIntParam(c, "id")
+
+	if idValidationError != nil {
+		return
+	}
+
+	optionId, optionIdValidationError := utils.ValidateIntParam(c, "optionId")
+
+	if optionIdValidationError != nil {
+		return
+	}
+
+	var pollOptionBody schema.PollOption = schema.BlankPollOption()
+	validationError := utils.ValidateBody(c, &pollOptionBody)
+
+	if validationError != nil {
+		return
+	}
+
+	pollOption, pollOptionNotFoundError := pollsService.UpdatePollOption(id, optionId, pollOptionBody)
+
+	if pollOptionNotFoundError != nil {
+		c.AbortWithStatusJSON(http.StatusNotFound, utils.ResponseError(pollOptionNotFoundError.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, pollsService.FormatExternalPollOption(id, *pollOption))
+}
+
+func deletePollOption(c *gin.Context) {
+	id, idValidationError := utils.ValidateIntParam(c, "id")
+
+	if idValidationError != nil {
+		return
+	}
+
+	optionId, optionIdValidationError := utils.ValidateIntParam(c, "optionId")
+
+	if optionIdValidationError != nil {
+		return
+	}
+
+	pollOptionNotFoundError := pollsService.DeletePollOption(id, optionId)
+
+	if pollOptionNotFoundError != nil {
+		c.AbortWithStatusJSON(http.StatusNotFound, utils.ResponseError(pollOptionNotFoundError.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, utils.ResponseMessage("poll option deleted"))
 }
