@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"voters-api/utils"
+	"os"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/nitishm/go-rejson/v4"
@@ -26,7 +26,13 @@ type Cache struct {
 }
 
 func NewCache(prefix string) (*Cache, error) {
-	return newCacheInstance(utils.GetEnvironmentVariable("REDIS_URL", RedisDefaultLocation), prefix)
+	redisUrl := os.Getenv("REDIS_URL")
+
+	if redisUrl == "" {
+		redisUrl = RedisDefaultLocation
+	}
+
+	return newCacheInstance(redisUrl, prefix)
 }
 
 func newCacheInstance(url string, prefix string) (*Cache, error) {

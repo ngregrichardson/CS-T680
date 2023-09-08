@@ -9,16 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func ValidateInt(param string) error {
-	_, err := strconv.ParseUint(param, 10, 32)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func ValidateIntParam(c *gin.Context, param string) (uint, error) {
 	stringValue := c.Param(param)
 
