@@ -1,0 +1,15 @@
+version: '3.9'
+services:
+  redis:
+    extends:
+      file: ./redis-docker-compose.yml
+      service: redis
+  voters-api:
+    extends:
+      file: ./voters-api/docker-compose.yml
+      service: voters-api
+  polls-api:
+    extends:
+      file: ./polls-api/docker-compose.yml
+      service: polls-api
+  

@@ -31,7 +31,7 @@ func GetRouter(group *gin.RouterGroup, hostname string) {
 	group.GET("", getPolls)
 	group.POST("", createPoll)
 	group.GET("/:id", getPoll)
-	group.PATCH("/:id", updatePoll)
+	group.PUT("/:id", updatePoll)
 	group.DELETE("/:id", deletePoll)
 
 	group.GET("/:id/options", getPollOptions)

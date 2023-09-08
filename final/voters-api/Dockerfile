@@ -14,6 +14,6 @@ WORKDIR /
 
 COPY --from=build /voters-api /voters-api
 
-EXPOSE 1080
+EXPOSE 1081
 
-CMD ["/voters-api"]
+CMD ["/voters-api", "-p", "1081"]

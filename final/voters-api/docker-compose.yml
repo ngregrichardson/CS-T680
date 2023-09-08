@@ -1,17 +1,16 @@
 version: '3.9'
 services:
-  redis:
-    extends:
-      file: ../redis-docker-compose.yml
-      service: redis
   voters-api:
     container_name: ngr27-voters-api
-    depends_on:
-      - redis
     image: ngregrichardson/voters-api
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - '1081:1080'
+      - '1081:1081'
+    networks:
+      - ngr27
+networks:
+  ngr27:
+    external: true
     
