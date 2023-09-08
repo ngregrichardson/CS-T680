@@ -4,9 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
-	"polls-api/api"
-	"polls-api/middleware"
-	"polls-api/utils"
+	"votes-api/api"
+	"votes-api/middleware"
+	"votes-api/utils"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -35,7 +35,11 @@ func NewRouter() *gin.Engine {
 		c.JSON(http.StatusNotFound, utils.ResponseError("route not found"))
 	})
 
-	api.GetRouter(router.Group("/polls"), utils.FormatHostname(portFlag, tlsFlag))
+	api.GetVotesRouter(router.Group("/votes"), utils.FormatHostname(portFlag, tlsFlag))
+
+	api.GetPollsRouter(router.Group("/polls"))
+
+	api.GetVotersRouter(router.Group("/voters"))
 
 	return router
 }

@@ -35,7 +35,7 @@ func NewRouter() *gin.Engine {
 		c.JSON(http.StatusNotFound, utils.ResponseError("route not found"))
 	})
 
-	api.GetRouter(router.Group("/voters"), utils.FormatHostname(hostFlag, portFlag, tlsFlag))
+	api.GetRouter(router.Group("/voters"), utils.FormatHostname(portFlag, tlsFlag))
 
 	return router
 }

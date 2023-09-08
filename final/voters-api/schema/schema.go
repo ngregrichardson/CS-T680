@@ -5,11 +5,6 @@ import (
 	"time"
 )
 
-type Link struct {
-	Method string `json:"method"`
-	Url    string `json:"url"`
-}
-
 type VoteRecord struct {
 	PollID   uint      `json:"pollId"`
 	VoteDate time.Time `json:"voteDate"`

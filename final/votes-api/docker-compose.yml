@@ -1,0 +1,26 @@
+version: '3.9'
+services:
+  redis:
+    extends:
+      file: ../redis-docker-compose.yml
+      service: redis
+  votes-api:
+    container_name: ngr27-votes-api
+    image: ngregrichardson/votes-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '1082:1082'
+    networks:
+      - ngr27
+    environment:
+      - VISIBLE_API_HOST=localhost
+      - POLLS_VISIBLE_API_URL=http://localhost:1080/polls
+      - VOTERS_VISIBLE_API_URL=http://localhost:1081/voters
+      - POLLS_API_URL=http://polls-api:1080/polls
+      - VOTERS_API_URL=http://voters-api:1081/voters
+networks:
+  ngr27:
+    external: true
+    

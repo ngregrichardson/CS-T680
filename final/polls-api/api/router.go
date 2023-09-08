@@ -3,8 +3,8 @@ package api
 import (
 	"net/http"
 	"polls-api/middleware"
-	"polls-api/polls"
 	"polls-api/schema"
+	"polls-api/services"
 	"polls-api/utils"
 	"time"
 
@@ -12,12 +12,12 @@ import (
 )
 
 var (
-	pollsService *polls.PollsService
+	pollsService *services.PollsService
 )
 
 func init() {
 	var err error
-	pollsService, err = polls.NewPollsService()
+	pollsService, err = services.NewPollsService()
 
 	if err != nil {
 		panic(err)

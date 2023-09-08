@@ -5,6 +5,7 @@ import "errors"
 type PollOption struct {
 	ID    uint   `json:"id"`
 	Title string `json:"title"`
+	Links Links  `json:"links"`
 }
 
 type PollOptions []PollOption
@@ -14,16 +15,7 @@ type Poll struct {
 	Title    string      `json:"title"`
 	Question string      `json:"question"`
 	Options  PollOptions `json:"options"`
-}
-
-func BlankPoll() Poll {
-	return Poll{
-		Options: make(PollOptions, 0),
-	}
-}
-
-func BlankPollOption() PollOption {
-	return PollOption{}
+	Links    Links       `json:"links"`
 }
 
 func (p *Poll) GetPollOption(optionId uint) (*PollOption, int, error) {
@@ -34,10 +26,4 @@ func (p *Poll) GetPollOption(optionId uint) (*PollOption, int, error) {
 	}
 
 	return &PollOption{}, 0, errors.New("poll option not found")
-}
-
-func (p *Poll) AddPollOption(pollOption PollOption) (*PollOption, error) {
-	p.Options = append(p.Options, pollOption)
-
-	return &pollOption, nil
 }

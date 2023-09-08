@@ -5,19 +5,19 @@ import (
 	"time"
 	"voters-api/middleware"
 	"voters-api/schema"
+	"voters-api/services"
 	"voters-api/utils"
-	"voters-api/voters"
 
 	"github.com/gin-gonic/gin"
 )
 
 var (
-	votersService *voters.VotersService
+	votersService *services.VotersService
 )
 
 func init() {
 	var err error
-	votersService, err = voters.NewVotersService()
+	votersService, err = services.NewVotersService()
 
 	if err != nil {
 		panic(err)

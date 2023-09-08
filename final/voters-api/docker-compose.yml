@@ -10,6 +10,9 @@ services:
       - '1081:1081'
     networks:
       - ngr27
+    environment:
+      - VISIBLE_API_HOST=localhost
+      - POLLS_API_URL = http://localhost:1080
 networks:
   ngr27:
     external: true

@@ -3,30 +3,30 @@ package utils
 import (
 	"fmt"
 	"polls-api/schema"
-
-	"github.com/gin-gonic/gin"
 )
 
-func FormatHostname(host string, port uint, tls bool) string {
+func FormatHostname(port uint, tls bool) string {
 	proto := "http"
 	if tls {
 		proto = "https"
 	}
 
+	host := GetEnvironmentVariable("VISIBLE_API_HOST", "localhost")
+
 	return fmt.Sprintf("%s://%s:%d", proto, host, port)
 }
 
-func GenerateCRUDLinks(fullUrl string) gin.H {
-	return gin.H{
-		"get": schema.Link{
+func GenerateCRUDLinks(fullUrl string) schema.Links {
+	return schema.Links{
+		Get: schema.Link{
 			Method: "GET",
 			Url:    fullUrl,
 		},
-		"update": schema.Link{
+		Update: schema.Link{
 			Method: "PATCH",
 			Url:    fullUrl,
 		},
-		"delete": schema.Link{
+		Delete: schema.Link{
 			Method: "DELETE",
 			Url:    fullUrl,
 		},

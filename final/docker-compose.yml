@@ -12,4 +12,13 @@ services:
     extends:
       file: ./polls-api/docker-compose.yml
       service: polls-api
+  votes-api:
+    extends:
+      file: ./votes-api/docker-compose.yml
+      service: votes-api
+
+networks:
+  ngr27:
+    driver: bridge
+    name: ngr27
   

@@ -1,4 +1,4 @@
-package voters
+package services
 
 import (
 	"errors"
@@ -27,17 +27,24 @@ func NewVotersService() (*VotersService, error) {
 	return &VotersService{
 		cache:       cache,
 		Hostname:    "",
-		PollsApiUrl: utils.GetEnvironmentVariable("POLLS_API_URL", "http://localhost:8080"),
+		PollsApiUrl: utils.GetEnvironmentVariable("POLLS_API_URL", "http://localhost:1080"),
 	}, nil
 }
 
 func (service *VotersService) FormatExternalVoter(voter schema.Voter) gin.H {
 	fullUrl := fmt.Sprintf("%s%s", service.Hostname, service.GetVoterPath(voter.ID))
+
+	externalVoteHistory := make([]gin.H, 0)
+
+	for _, vote := range voter.VoteHistory {
+		externalVoteHistory = append(externalVoteHistory, service.FormatExternalVoteRecord(voter.ID, vote))
+	}
+
 	return gin.H{
 		"id":        voter.ID,
 		"firstName": voter.FirstName,
 		"lastName":  voter.LastName,
-		"votes":     voter.VoteHistory,
+		"votes":     externalVoteHistory,
 		"links": gin.H{
 			"get": schema.Link{
 				Method: "GET",

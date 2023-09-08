@@ -1,4 +1,4 @@
-package polls
+package services
 
 import (
 	"errors"
@@ -28,13 +28,28 @@ func NewPollsService() (*PollsService, error) {
 	}, nil
 }
 
+func (service *PollsService) GetPollPath(id uint) string {
+	return fmt.Sprintf("/polls/%d", id)
+}
+
+func (service *PollsService) GetPollOptionSubPath(id uint) string {
+	return fmt.Sprintf("/options/%d", id)
+}
+
 func (service *PollsService) FormatExternal(poll schema.Poll) gin.H {
 	fullUrl := fmt.Sprintf("%s%s", service.Hostname, service.GetPollPath(poll.ID))
+
+	externalOptions := make([]gin.H, 0)
+
+	for _, option := range poll.Options {
+		externalOptions = append(externalOptions, service.FormatExternalPollOption(poll.ID, option))
+	}
+
 	return gin.H{
 		"id":       poll.ID,
 		"title":    poll.Title,
 		"question": poll.Question,
-		"options":  poll.Options,
+		"options":  externalOptions,
 		"links":    utils.GenerateCRUDLinks(fullUrl),
 	}
 }
@@ -46,14 +61,6 @@ func (service *PollsService) FormatExternalPollOption(id uint, pollOption schema
 		"title": pollOption.Title,
 		"links": utils.GenerateCRUDLinks(fullUrl),
 	}
-}
-
-func (service *PollsService) GetPollPath(id uint) string {
-	return fmt.Sprintf("/polls/%d", id)
-}
-
-func (service *PollsService) GetPollOptionSubPath(id uint) string {
-	return fmt.Sprintf("/options/%d", id)
 }
 
 /* Manage Polls */
@@ -111,7 +118,7 @@ func (service *PollsService) AddPoll(poll schema.Poll) (schema.Poll, error) {
 		return schema.Poll{}, setErr
 	}
 
-	return service.GetPoll(poll.ID)
+	return poll, nil
 }
 
 func (service *PollsService) replacePoll(id uint, poll schema.Poll) (schema.Poll, error) {
@@ -122,7 +129,7 @@ func (service *PollsService) replacePoll(id uint, poll schema.Poll) (schema.Poll
 		return schema.Poll{}, setErr
 	}
 
-	return service.GetPoll(id)
+	return poll, nil
 }
 
 func (service *PollsService) UpdatePoll(id uint, poll schema.Poll) (schema.Poll, error) {

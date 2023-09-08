@@ -10,6 +10,8 @@ services:
       - '1080:1080'
     networks:
       - ngr27
+    environment:
+      - VISIBLE_API_HOST=localhost
 networks:
   ngr27:
     external: true

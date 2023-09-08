@@ -1,3 +1,16 @@
+# About
+
+## General Flow
+The general flow of a request:
+- **Middleware** (`middleware`): Tracks request and response times for statistics.
+- **Router** (`api`): Handles routing to the proper handler and validates inputs as well as formats responses.
+- **Service** (`services`): Handles logic for getting, setting, and updating data.
+- **Cache** (`cache`): Handles storing data.
+
+Some other packages are available:
+- `schema`: Defines types and a few interface methods.
+- `utils`: Defines utility functions for a variety of different purposes.
+
 # How to Use
 
 ## Automatic
@@ -140,11 +153,6 @@ Deletes a vote made by a voter specified by `id` on a poll specified by `pollId`
 |:------:|:-----:|----------------------|:---------:|
 |   id   | `int` | The id of the voter. |     ✅     |
 | pollId | `int` | The id of the poll.  |     ✅     |
-
-
-
-
-
 
 # Polls API Usage
 

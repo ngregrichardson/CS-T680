@@ -1,15 +1,21 @@
 package utils
 
-import "github.com/gin-gonic/gin"
+type ErrorResponse struct {
+	Error string `json:"error"`
+}
 
-func ResponseError(message string) gin.H {
-	return gin.H{
-		"error": message,
+type MessageResponse struct {
+	Message string `json:"message"`
+}
+
+func ResponseError(message string) ErrorResponse {
+	return ErrorResponse{
+		Error: message,
 	}
 }
 
-func ResponseMessage(message string) gin.H {
-	return gin.H{
-		"message": message,
+func ResponseMessage(message string) MessageResponse {
+	return MessageResponse{
+		Message: message,
 	}
 }
